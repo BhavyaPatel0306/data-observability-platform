@@ -8,6 +8,16 @@ Validated on October 7, 2026, with Python 3.12 on Windows.
 
 The first test attempt could not create its sandbox temporary directories. Running with an approved local temporary directory resolved this environment issue.
 
-Not executed here: PostgreSQL integration, Docker image build, Minikube/Kind deployment, Kubernetes server validation, Prometheus `promtool` checks, dashboard rendering, Grafana alert evaluation, or hosted GitHub Actions. Docker, kubectl, and Minikube were unavailable in the execution environment. SQLite tests do not establish PostgreSQL or cluster compatibility.
+## GitHub Actions: passed
 
-The included CI workflow performs the PostgreSQL tests, Prometheus rule checks, and Kind deployment/smoke checks when pushed to GitHub. Those checks are **configured, not yet observed passing**. The Minikube guide provides the equivalent local deployment path. No throughput, uptime, or production-performance claims were measured.
+[CI run 37722066394](https://github.com/BhavyaPatel0306/data-observability-platform/actions/runs/37722066394) passed for implementation commit `430a8d8` on October 7, 2026 (America/Toronto).
+
+- Python lint and the full 15-test suite passed on Ubuntu.
+- All 13 API tests passed against a real PostgreSQL 16 service.
+- Prometheus configuration syntax and alert-rule evaluation tests passed.
+- The API Docker image built successfully.
+- A Kind Kubernetes cluster accepted the manifests, completed schema initialization, and rolled out the API, Prometheus, and Grafana.
+- Sample event traffic completed successfully.
+- The monitoring smoke check verified both API scrape targets were healthy, all four Prometheus rules were loaded, the six-panel Grafana dashboard was provisioned, and the Grafana-managed database-error rule existed.
+
+Not directly verified: Minikube on this Windows machine, visual dashboard rendering in a browser, end-to-end Grafana alert firing, external notification delivery, volume recovery, or production performance. Docker, kubectl, and Minikube were unavailable locally; the cluster checks above ran on GitHub's Ubuntu runner using Kind. No throughput or uptime claims were measured.

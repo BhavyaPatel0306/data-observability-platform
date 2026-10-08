@@ -23,4 +23,4 @@ uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
 
 For a lightweight development-only run, `DATABASE_URL=sqlite:///local.db` also works. PostgreSQL is the deployed backend. Schema creation is intentionally a separate operation to avoid races between replicas; future schema changes need migrations.
 
-CI runs lint, SQLite and PostgreSQL API tests, Prometheus syntax/rule tests, builds the image, deploys to Kind, generates events, and checks both scrape targets and Grafana provisioning. A workflow file being present is not evidence that hosted CI has passed; check the Actions run after pushing.
+CI runs lint, SQLite and PostgreSQL API tests, Prometheus syntax/rule tests, builds the image, deploys to Kind, generates events, and checks both scrape targets and Grafana provisioning. See the [validation report](../VALIDATION.md) for the verified initial run and the repository's Actions tab for subsequent runs.
