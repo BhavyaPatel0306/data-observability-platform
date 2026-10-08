@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-db
+  namespace: data-observability
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      containers:
+      - name: init
+        image: data-observability-api:local
+        imagePullPolicy: IfNotPresent
+        command:
+        - python
+        - -m
+        - app.init_db
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: platform-secrets
+              key: DATABASE_URL

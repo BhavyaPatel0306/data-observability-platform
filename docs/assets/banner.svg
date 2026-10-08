@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+<title id="title">Data Observability Platform</title><desc id="desc">Validate, persist, observe. Kubernetes, FastAPI, PostgreSQL, Prometheus, and Grafana.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0b1224"/><stop offset="1" stop-color="#142b43"/></linearGradient><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity=".035"/></pattern></defs>
+<rect width="1200" height="320" rx="18" fill="url(#bg)"/><rect width="1200" height="320" rx="18" fill="url(#grid)"/>
+<rect x="54" y="48" width="172" height="28" rx="14" fill="#123f48"/><text x="140" y="67" text-anchor="middle" fill="#71e8ca" font-family="Arial,sans-serif" font-size="12" font-weight="700" letter-spacing="2">DATA ENGINEERING</text>
+<text x="54" y="137" fill="#f3f7ff" font-family="Arial,sans-serif" font-size="42" font-weight="700">Data Observability</text>
+<text x="54" y="185" fill="#f3f7ff" font-family="Arial,sans-serif" font-size="42" font-weight="700">Platform</text>
+<text x="56" y="226" fill="#a9bfd5" font-family="Arial,sans-serif" font-size="18">Validate. Persist. Observe.</text>
+<text x="56" y="276" fill="#7599b7" font-family="Arial,sans-serif" font-size="13" letter-spacing="1">FASTAPI / POSTGRESQL / KUBERNETES / PROMETHEUS / GRAFANA</text>
+<path d="M795 158H875M965 158H1045" stroke="#4c7b96" stroke-width="3"/><g fill="#132f45" stroke="#315a74" stroke-width="2"><rect x="705" y="113" width="90" height="90" rx="18"/><rect x="875" y="113" width="90" height="90" rx="18"/><rect x="1045" y="113" width="90" height="90" rx="18"/></g>
+<path d="m728 159 15 15 29-32" fill="none" stroke="#71e8ca" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="none" stroke="#71b8ff" stroke-width="3"><ellipse cx="920" cy="141" rx="22" ry="8"/><path d="M898 141v32c0 11 44 11 44 0v-32M898 157c0 11 44 11 44 0"/></g>
+<path d="M1064 178v-17h12v17m10 0v-34h12v34m10 0v-47h12v47" fill="none" stroke="#71e8ca" stroke-width="3"/>
+<g fill="#a9bfd5" font-family="Arial,sans-serif" font-size="13" text-anchor="middle"><text x="750" y="232">VALIDATE</text><text x="920" y="232">PERSIST</text><text x="1090" y="232">OBSERVE</text></g>
+</svg>

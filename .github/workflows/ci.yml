@@ -1,0 +1,72 @@
+name: CI
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.8-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U test -d test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check app tests scripts
+      - run: pytest -q
+      - name: PostgreSQL integration
+        run: pytest -q tests/test_api.py
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg://test:ci-only-password@localhost:5432/test
+      - name: Check Prometheus configuration and rules
+        run: |
+          docker run --rm --entrypoint promtool -v "$PWD/monitoring:/etc/prometheus:ro" prom/prometheus:v3.3.0 check config --syntax-only /etc/prometheus/prometheus.yml
+          docker run --rm --entrypoint promtool -v "$PWD/monitoring:/etc/prometheus:ro" prom/prometheus:v3.3.0 test rules /etc/prometheus/alerts.test.yml
+  kubernetes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: observability-ci
+      - run: docker build -t data-observability-api:local .
+      - run: kind load docker-image data-observability-api:local --name observability-ci
+      - name: Deploy and verify
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/secret.example.yaml
+          kubectl apply -k .
+          kubectl -n data-observability wait --for=condition=complete job/init-db --timeout=180s
+          kubectl -n data-observability rollout status deployment/api --timeout=180s
+          kubectl -n data-observability rollout status deployment/prometheus --timeout=180s
+          kubectl -n data-observability rollout status deployment/grafana --timeout=180s
+          kubectl -n data-observability port-forward service/api 8000:8000 > /tmp/api-forward.log 2>&1 &
+          kubectl -n data-observability port-forward service/prometheus 9090:9090 > /tmp/prom-forward.log 2>&1 &
+          kubectl -n data-observability port-forward service/grafana 3000:3000 > /tmp/grafana-forward.log 2>&1 &
+          sleep 10
+          curl --fail http://localhost:8000/health/ready
+          python scripts/generate_data.py --count 20 --invalid-rate 0 --stale-rate 0
+          sleep 30
+          python scripts/smoke_monitoring.py
+        env:
+          INGEST_API_KEY: local-demo-api-key-change-me
+          GRAFANA_USER: admin
+          GRAFANA_PASSWORD: local-demo-grafana-change-me
+      - name: Diagnostics
+        if: failure()
+        run: |
+          kubectl -n data-observability get pods
+          kubectl -n data-observability get events --sort-by=.lastTimestamp
+          kubectl -n data-observability logs deployment/api --all-containers --tail=100
+          kubectl -n data-observability logs deployment/grafana --tail=100

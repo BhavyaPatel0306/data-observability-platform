@@ -1,0 +1,52 @@
+rule_files:
+- alerts.yml
+evaluation_interval: 1m
+tests:
+- interval: 1m
+  input_series:
+  - series: dop_events_total{outcome="accepted"}
+    values: 0+80x15
+  - series: dop_events_total{outcome="rejected"}
+    values: 0+20x15
+  - series: dop_events_total{outcome="db_error"}
+    values: 0+1x15
+  - series: dop_stale_events_total
+    values: 0+20x15
+  - series: up{job="ingest-api"}
+    values: 1+0x15
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: HighRejectionRate
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+      exp_annotations:
+        summary: More than 10% of validly authenticated submissions fail validation
+  - eval_time: 10m
+    alertname: StaleData
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+      exp_annotations:
+        summary: More than 10% of accepted data is over 5 minutes old
+  - eval_time: 10m
+    alertname: IngestDatabaseErrors
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+      exp_annotations:
+        summary: Ingestion cannot persist events
+  - eval_time: 10m
+    alertname: NoAPIAvailable
+    exp_alerts: []
+- interval: 1m
+  input_series: []
+  alert_rule_test:
+  - eval_time: 2m
+    alertname: NoAPIAvailable
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        job: ingest-api
+      exp_annotations:
+        summary: No API scrape targets are available

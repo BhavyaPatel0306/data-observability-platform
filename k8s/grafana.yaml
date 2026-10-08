@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: data-observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:11.6.1
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        env:
+        - name: GF_SECURITY_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: platform-secrets
+              key: GF_SECURITY_ADMIN_USER
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: platform-secrets
+              key: GF_SECURITY_ADMIN_PASSWORD
+        - name: GF_USERS_ALLOW_SIGN_UP
+          value: 'false'
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/grafana
+        - name: dashboard
+          mountPath: /var/lib/grafana/dashboards
+        - name: provisioning
+          mountPath: /etc/grafana/provisioning/datasources/datasources.yml
+          subPath: datasources.yml
+        - name: provisioning
+          mountPath: /etc/grafana/provisioning/dashboards/dashboards.yml
+          subPath: dashboards.yml
+        - name: provisioning
+          mountPath: /etc/grafana/provisioning/alerting/grafana-alerts.yml
+          subPath: grafana-alerts.yml
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+      securityContext:
+        fsGroup: 10001
+      automountServiceAccountToken: false
+      volumes:
+      - name: data
+        emptyDir: {}
+      - name: dashboard
+        configMap:
+          name: grafana-dashboard
+      - name: provisioning
+        configMap:
+          name: grafana-provisioning

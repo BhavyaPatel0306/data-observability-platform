@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: data-observability
+resources:
+- k8s/api-config.yaml
+- k8s/api-service.yaml
+- k8s/api.yaml
+- k8s/grafana-service.yaml
+- k8s/grafana.yaml
+- k8s/init-db.yaml
+- k8s/namespace.yaml
+- k8s/postgres-service.yaml
+- k8s/postgres.yaml
+- k8s/prometheus-rbac.yaml
+- k8s/prometheus-service.yaml
+- k8s/prometheus.yaml
+configMapGenerator:
+- name: prometheus-config
+  files:
+  - monitoring/prometheus.yml
+  - monitoring/alerts.yml
+- name: grafana-dashboard
+  files:
+  - monitoring/dashboard.json
+- name: grafana-provisioning
+  files:
+  - monitoring/datasources.yml
+  - monitoring/dashboards.yml
+  - monitoring/grafana-alerts.yml

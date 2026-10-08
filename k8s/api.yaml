@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: data-observability
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+      - name: api
+        image: data-observability-api:local
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: platform-secrets
+              key: DATABASE_URL
+        - name: INGEST_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: platform-secrets
+              key: INGEST_API_KEY
+        envFrom:
+        - configMapRef:
+            name: api-config
+        args:
+        - uvicorn
+        - app.main:create_app
+        - --factory
+        - --host
+        - 0.0.0.0
+        - --port
+        - '8000'
+        - --log-level
+        - info
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8000
+          periodSeconds: 5
+          timeoutSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+      securityContext:
+        fsGroup: 10001
+      automountServiceAccountToken: false

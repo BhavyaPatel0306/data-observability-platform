@@ -1,0 +1,33 @@
+groups:
+- name: data-quality
+  rules:
+  - alert: HighRejectionRate
+    expr: sum(rate(dop_events_total{outcome="rejected"}[5m])) / clamp_min(sum(rate(dop_events_total{outcome=~"accepted|rejected"}[5m])),
+      0.001) > 0.1
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: More than 10% of validly authenticated submissions fail validation
+  - alert: StaleData
+    expr: sum(rate(dop_stale_events_total[5m])) / clamp_min(sum(rate(dop_events_total{outcome="accepted"}[5m])),
+      0.001) > 0.1
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: More than 10% of accepted data is over 5 minutes old
+  - alert: IngestDatabaseErrors
+    expr: sum(increase(dop_events_total{outcome="db_error"}[5m])) > 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: Ingestion cannot persist events
+  - alert: NoAPIAvailable
+    expr: sum(up{job="ingest-api"}) == 0 or absent(up{job="ingest-api"})
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: No API scrape targets are available
